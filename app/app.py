@@ -24,7 +24,7 @@ app.config["OIDC_SCOPES"] = ["openid", "email", "profile"]
 app.config["SECRET_KEY"] = "{{ LONG_RANDOM_STRING }}"
 app.config["OIDC_ID_TOKEN_COOKIE_NAME"] = "oidc_token"
 oidc = OpenIDConnect(app)
-okta_client = UsersClient("{{ OKTA_ORG_URL }}", "{{ OKTA_AUTH_TOKEN }}")
+okta_client = UsersClient("{{ https://dev-5564495.okta.com }}", "{{ 00sfBb7ZCadBOk_nIECHjS0o2okOi86Sq7EDcVuISi }}")
 
 
 @app.before_request
