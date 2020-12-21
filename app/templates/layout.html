@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% if user %}
         <title>{{ user.username }} Project Site</title>
     {% else %}
@@ -32,6 +33,14 @@
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
         <li class="nav-item">
+            <a class="p-2 text-dark" href="/" title="Home">Home</a>
+        {% if not g.user %}
+          <a class="p-2 text-dark" href="/login">Log In / Register</a>
+        {% else %}
+          <a class="p-2 text-dark" href="/dashboard">Dashboard</a>
+          <a class="p-2 text-dark" href="/logout">Logout</a>
+        {% endif %}
+        </li>
         <a class="nav-link" href="/">Home<span class="sr-only"></span></a>
       </li>
       <li class="nav-item">
