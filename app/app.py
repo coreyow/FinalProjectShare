@@ -1,9 +1,11 @@
 from typing import List, Dict
 import simplejson as json
-from flask import Flask, request, Response, redirect
-from flask import render_template
+from flask import Flask, request, Response
 from flaskext.mysql import MySQL
 from pymysql.cursors import DictCursor
+from flask import render_template, g, redirect, url_for
+from flask_oidc import OpenIDConnect
+from okta import UsersClient
 
 app = Flask(__name__)
 mysql = MySQL(cursorclass=DictCursor)
@@ -15,10 +17,62 @@ app.config['MYSQL_DATABASE_PORT'] = 3306
 app.config['MYSQL_DATABASE_DB'] = 'pitchersData'
 mysql.init_app(app)
 
-@app.route('/')
+app = Flask(__name__)
+app.config["OIDC_CLIENT_SECRETS"] = "client_secrets.json"
+app.config["OIDC_COOKIE_SECURE"] = False
+app.config["OIDC_CALLBACK_ROUTE"] = "/oidc/callback"
+app.config["OIDC_SCOPES"] = ["openid", "email", "profile"]
+app.config["SECRET_KEY"] = "{{ LONG_RANDOM_STRING }}"
+app.config["OIDC_ID_TOKEN_COOKIE_NAME"] = "oidc_token"
+oidc = OpenIDConnect(app)
+okta_client = UsersClient("{{ OKTA_ORG_URL }}", "{{ OKTA_AUTH_TOKEN }}")
+
+
+@app.before_request
+def before_request():
+    if oidc.user_loggedin:
+        g.user = okta_client.get_user(oidc.user_getfield("sub"))
+    else:
+        g.user = None
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/dashboard")
+@oidc.require_login
+def dashboard():
+    return render_template("dashboard.html")
+
+
+@app.route("/login")
+@oidc.require_login
+def login():
+    return redirect(url_for(".dashboard"))
+
+
+@app.route("/logout")
+def logout():
+    oidc.logout()
+    return redirect(url_for(".index"))
+
+@app.route("/")
+def login():
+    user = {'username': 'Corey & Roberto'}
+    return render_template('signup.html', user=user)
+
+@app.route("/dashboard")
+def dashboard():
+    user = {'username': 'Corey & Roberto'}
+    return render_template('dashboard.html', user=user)
+
+@app.route('/home/')
 def home():
     user = {'username': 'Corey & Roberto'}
-    return render_template('home.html', title='Home', user=user)
+    return render_template('home.html', user=user)
+
 
 @app.route('/calendar/')
 def calendar():
